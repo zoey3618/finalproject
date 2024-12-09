@@ -185,3 +185,138 @@ class RestaurantWindow {
         frame.setVisible(true);
     }
 }
+
+// Delivery Window
+class DeliveryWindow {
+    public DeliveryWindow() {
+        JFrame frame = new JFrame("Delivery Person Portal");
+        frame.setSize(600, 400);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setLayout(new GridLayout(4, 1, 10, 10));
+
+        JLabel label = new JLabel("Delivery Features", SwingConstants.CENTER);
+        label.setFont(new Font("Arial", Font.BOLD, 20));
+        frame.add(label);
+
+        JButton waitingButton = new JButton("Waiting for Food");
+        JButton pickedUpButton = new JButton("Mark as Picked Up");
+        JButton inTransitButton = new JButton("Mark as In Transit");
+        JButton deliveredButton = new JButton("Mark as Delivered");
+        JButton sendMessageButton = new JButton("Send Message");
+
+        // Disable status update buttons initially
+        pickedUpButton.setEnabled(false);
+        inTransitButton.setEnabled(false);
+        deliveredButton.setEnabled(false);
+
+        // Check if the order is ready for delivery
+        if (FoodDeliverySystem.sharedOrder.getStatus().equals("Ready for Delivery")) {
+            waitingButton.setText("Food Ready for Delivery");
+            pickedUpButton.setEnabled(true);
+            inTransitButton.setEnabled(true);
+            deliveredButton.setEnabled(true);
+        }
+
+        pickedUpButton.addActionListener(e -> {
+            FoodDeliverySystem.sharedOrder.setStatus("Picked Up");
+            JOptionPane.showMessageDialog(frame, "Order marked as Picked Up.");
+        });
+        inTransitButton.addActionListener(e -> {
+            FoodDeliverySystem.sharedOrder.setStatus("In Transit");
+            JOptionPane.showMessageDialog(frame, "Order marked as In Transit.");
+        });
+        deliveredButton.addActionListener(e -> {
+            FoodDeliverySystem.sharedOrder.setStatus("Delivered");
+            JOptionPane.showMessageDialog(frame, "Order marked as Delivered.");
+            new FeedbackWindow(); // Open feedback window
+        });
+        sendMessageButton.addActionListener(e -> {
+            String message = JOptionPane.showInputDialog(frame, "Enter your message to the customer:");
+            if (message != null && !message.trim().isEmpty()) {
+                FoodDeliverySystem.sharedOrder.setMessage(message);
+                JOptionPane.showMessageDialog(frame, "Message sent to customer!");
+            } else {
+                JOptionPane.showMessageDialog(frame, "Message cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        frame.add(waitingButton);
+        frame.add(pickedUpButton);
+        frame.add(inTransitButton);
+        frame.add(deliveredButton);
+        frame.add(sendMessageButton);
+
+        frame.setVisible(true);
+    }
+}
+
+// Menu GUI
+class MenuGUI {
+    private final HashMap<String, String> dishImageMap = new HashMap<>();
+
+
+    public MenuGUI(List<String> cart) {
+        // Mapping dishes to corrected image paths
+        dishImageMap.put("Spicy and Sour Beef in Soup - $19.99", "1/src/images/2.jpeg");
+        dishImageMap.put("Steamed Fish Head with Chopped Chili - $22.99", "1/src/images/4.jpg");
+        dishImageMap.put("Minced Pork with Pickled Green Beans - $16.99", "1/src/images/5.jpeg");
+        dishImageMap.put("Twice-Cooked Pork Belly - $17.99", "1/src/images/6.jpg");
+        dishImageMap.put("Spicy and Sour Chicken Gizzards - $16.99", "1/src/images/7.jpg");
+        dishImageMap.put("Kelp and Pork Rib Soup - $14.99", "1/src/images/8.jpeg");
+        dishImageMap.put("Cold Cucumber Salad - $8.99", "1/src/images/9.jpg");
+        dishImageMap.put("Yangzhou Fried Rice - $12.99", "1/src/images/10.jpeg");
+        dishImageMap.put("Sichuan-style Boiled Beef in Chili Sauce - $19.99", "1/src/images/11.jpg");
+        dishImageMap.put("Stir-fried Chicken with Old Ginger - $18.99", "1/src/images/12.jpg");
+        dishImageMap.put("Chongqing-style Spicy Chicken - $19.99", "1/src/images/13.jpg");
+
+        JFrame frame = new JFrame("Browse Menu");
+        frame.setSize(800, 600);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+
+        JLabel label = new JLabel("Menu", SwingConstants.CENTER);
+        label.setFont(new Font("Arial", Font.BOLD, 20));
+        frame.add(label, BorderLayout.NORTH);
+
+        JPanel menuPanel = new JPanel();
+        menuPanel.setLayout(new GridLayout(0, 2, 10, 10)); // Two columns for names and images
+
+        DefaultListModel<String> menuModel = new DefaultListModel<>();
+        JList<String> menuList = new JList<>(menuModel);
+        menuList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        menuList.setFont(new Font("Arial", Font.PLAIN, 16));
+
+        // Add items to the list and their images to the panel
+        for (String dish : dishImageMap.keySet()) {
+            menuModel.addElement(dish);
+
+            // Add corresponding dish image to the panel
+            String imagePath = dishImageMap.get(dish);
+            ImageIcon dishIcon = new ImageIcon(imagePath);
+            Image scaledImage = dishIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+
+            menuPanel.add(imageLabel);
+        }
+
+        // Scrollable list of menu items
+        JScrollPane scrollPane = new JScrollPane(menuList);
+        frame.add(scrollPane, BorderLayout.WEST);
+        frame.add(new JScrollPane(menuPanel), BorderLayout.CENTER);
+
+        JButton addToCartButton = new JButton("Add to Cart");
+        addToCartButton.addActionListener(e -> {
+            String selectedDish = menuList.getSelectedValue();
+            if (selectedDish != null) {
+                cart.add(selectedDish);
+                JOptionPane.showMessageDialog(frame, selectedDish + " added to cart!");
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select a dish from the list.");
+            }
+        });
+
+        frame.add(addToCartButton, BorderLayout.SOUTH);
+
+        frame.setVisible(true);
+    }
+}
