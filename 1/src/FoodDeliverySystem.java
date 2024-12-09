@@ -17,6 +17,7 @@ public class FoodDeliverySystem {
 class Order {
     private List<String> items = new ArrayList<>();
     private String status = "No Order Placed";
+    private String feedback = "No feedback yet"; // New field for feedback
 
     public void setItems(List<String> items) {
         this.items = new ArrayList<>(items);
@@ -34,7 +35,16 @@ class Order {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public String getFeedback() { // Getter for feedback
+        return feedback;
+    }
+
+    public void setFeedback(String feedback) { // Setter for feedback
+        this.feedback = feedback;
+    }
 }
+
 
 // Main Window
 class MainWindow {
@@ -54,7 +64,7 @@ class MainWindow {
         JButton restaurantButton = new JButton("Restaurant Staff");
         JButton deliveryButton = new JButton("Delivery Person");
 
-        customerButton.addActionListener(e -> new CustomerInfo());
+        customerButton.addActionListener(e -> new CustomerWindow() );
 
         restaurantButton.addActionListener(e -> new RestaurantWindow());
         deliveryButton.addActionListener(e -> new DeliveryWindow());
@@ -68,56 +78,9 @@ class MainWindow {
     }
 }
 
-class CustomerInfo {
-    public CustomerInfo() {
-        JFrame frame = new JFrame("Customer Information");
-        frame.setSize(400, 300);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setLayout(new GridLayout(5, 1, 10, 10));
-
-        JLabel nameLabel = new JLabel("Name:");
-        JTextField nameField = new JTextField();
-
-        JLabel phoneLabel = new JLabel("Telephone:");
-        JTextField phoneField = new JTextField();
-
-        JLabel addressLabel = new JLabel("Address:");
-        JTextField addressField = new JTextField();
-
-        JButton saveButton = new JButton("Save");
-
-        frame.add(nameLabel);
-        frame.add(nameField);
-        frame.add(phoneLabel);
-        frame.add(phoneField);
-        frame.add(addressLabel);
-        frame.add(addressField);
-        frame.add(saveButton);
-
-        saveButton.addActionListener(e -> {
-            String name = nameField.getText().trim();
-            String phone = phoneField.getText().trim();
-            String address = addressField.getText().trim();
-
-            if (name.isEmpty() || phone.isEmpty() || address.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(frame, "Information saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                frame.dispose();
-
-                // Pass the user info to CustomerWindow
-                CustomerWindow customerWindow = new CustomerWindow();
-                customerWindow.setCustomerInfo(name, phone, address);
-            }
-        });
-
-        frame.setVisible(true);
-    }
-}
 
 
-
-// Customer Window
+// CustomerWindow 
 class CustomerWindow {
     private final List<String> cart = new ArrayList<>();
     private String customerName;
@@ -128,7 +91,7 @@ class CustomerWindow {
         JFrame frame = new JFrame("Customer Portal");
         frame.setSize(600, 400);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setLayout(new GridLayout(4, 1, 10, 10)); // Updated to 4 rows
+        frame.setLayout(new GridLayout(5, 1, 10, 10)); // Updated to 5 rows
 
         JLabel label = new JLabel("Customer Features", SwingConstants.CENTER);
         label.setFont(new Font("Arial", Font.BOLD, 20));
@@ -137,32 +100,19 @@ class CustomerWindow {
         JButton browseMenuButton = new JButton("Browse Menu");
         JButton viewCartButton = new JButton("View Cart");
         JButton viewOrderStatusButton = new JButton("View Order's Status");
-        JButton viewProfileButton = new JButton("View Profile"); // New button
 
         browseMenuButton.addActionListener(e -> new MenuGUI(cart));
         viewCartButton.addActionListener(e -> new CartGUI(cart, FoodDeliverySystem.sharedOrder));
         viewOrderStatusButton.addActionListener(e -> JOptionPane.showMessageDialog(frame,
                 "Order Status: " + FoodDeliverySystem.sharedOrder.getStatus()));
 
-        // New action listener for "View Profile"
-        viewProfileButton.addActionListener(e -> {
-            String profileInfo = String.format("Name: %s%nPhone: %s%nAddress: %s",
-                    customerName != null ? customerName : "Not set",
-                    customerPhone != null ? customerPhone : "Not set",
-                    customerAddress != null ? customerAddress : "Not set");
-
-            JOptionPane.showMessageDialog(frame, profileInfo, "Profile Information", JOptionPane.INFORMATION_MESSAGE);
-        });
-
         frame.add(browseMenuButton);
         frame.add(viewCartButton);
         frame.add(viewOrderStatusButton);
-        frame.add(viewProfileButton); // Add the new button
 
         frame.setVisible(true);
     }
 
-    // New setters for customer information
     public void setCustomerInfo(String name, String phone, String address) {
         this.customerName = name;
         this.customerPhone = phone;
@@ -171,7 +121,9 @@ class CustomerWindow {
 }
 
 
+
 // Restaurant Window
+// Updated RestaurantWindow
 class RestaurantWindow {
     public RestaurantWindow() {
         JFrame frame = new JFrame("Restaurant Staff Portal");
@@ -185,6 +137,7 @@ class RestaurantWindow {
 
         JButton viewIncomingOrdersButton = new JButton("View Incoming Orders");
         JButton updateOrderStatusButton = new JButton("Update Order Status");
+        JButton viewFeedbackButton = new JButton("viewFeedback");
 
         viewIncomingOrdersButton.addActionListener(e -> {
             List<String> items = FoodDeliverySystem.sharedOrder.getItems();
@@ -205,28 +158,50 @@ class RestaurantWindow {
             }
         });
 
+        viewFeedbackButton.addActionListener(e -> {
+            String feedback = FoodDeliverySystem.sharedOrder.getFeedback();
+            JOptionPane.showMessageDialog(frame, "Customer Feedback: " + feedback);
+        });
+
         frame.add(viewIncomingOrdersButton);
         frame.add(updateOrderStatusButton);
+        frame.add(viewFeedbackButton);
 
         frame.setVisible(true);
     }
 }
 
+
 // Delivery Window
+// Updated DeliveryWindow
 class DeliveryWindow {
     public DeliveryWindow() {
         JFrame frame = new JFrame("Delivery Person Portal");
         frame.setSize(600, 400);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setLayout(new GridLayout(3, 1, 10, 10));
+        frame.setLayout(new GridLayout(4, 1, 10, 10));
 
         JLabel label = new JLabel("Delivery Features", SwingConstants.CENTER);
         label.setFont(new Font("Arial", Font.BOLD, 20));
         frame.add(label);
 
+        JButton waitingButton = new JButton("Waiting for Food");
         JButton pickedUpButton = new JButton("Mark as Picked Up");
         JButton inTransitButton = new JButton("Mark as In Transit");
         JButton deliveredButton = new JButton("Mark as Delivered");
+
+        // Disable status update buttons initially
+        pickedUpButton.setEnabled(false);
+        inTransitButton.setEnabled(false);
+        deliveredButton.setEnabled(false);
+
+        // Check if the order is ready for delivery
+        if (FoodDeliverySystem.sharedOrder.getStatus().equals("Ready for Delivery")) {
+            waitingButton.setText("Food Ready for Delivery");
+            pickedUpButton.setEnabled(true);
+            inTransitButton.setEnabled(true);
+            deliveredButton.setEnabled(true);
+        }
 
         pickedUpButton.addActionListener(e -> {
             FoodDeliverySystem.sharedOrder.setStatus("Picked Up");
@@ -239,8 +214,10 @@ class DeliveryWindow {
         deliveredButton.addActionListener(e -> {
             FoodDeliverySystem.sharedOrder.setStatus("Delivered");
             JOptionPane.showMessageDialog(frame, "Order marked as Delivered.");
+            new FeedbackWindow(); // Open feedback window
         });
 
+        frame.add(waitingButton);
         frame.add(pickedUpButton);
         frame.add(inTransitButton);
         frame.add(deliveredButton);
@@ -261,7 +238,22 @@ class MenuGUI {
         label.setFont(new Font("Arial", Font.BOLD, 20));
         frame.add(label, BorderLayout.NORTH);
 
-        String[] menuItems = {"Pizza - $10", "Burger - $8", "Pasta - $12"};
+        String[] menuItems = {
+            "Stir-fried Spicy Beef - $18.99",
+            "Spicy and Sour Beef in Soup - $19.99",
+            "Mao Xue Wang (Spicy Offal and Blood Stew) - $24.99",
+            "Steamed Fish Head with Chopped Chili - $22.99",
+            "Minced Pork with Pickled Green Beans - $16.99",
+            "Twice-Cooked Pork Belly - $17.99",
+            "Spicy and Sour Chicken Gizzards - $16.99",
+            "Kelp and Pork Rib Soup - $14.99",
+            "Cold Cucumber Salad - $8.99",
+            "Yangzhou Fried Rice - $12.99",
+            "Sichuan-style Boiled Beef in Chili Sauce - $19.99",
+            "Stir-fried Chicken with Old Ginger - $18.99",
+            "Chongqing-style Spicy Chicken - $19.99"
+        };
+
         JList<String> menuList = new JList<>(menuItems);
 
         frame.add(new JScrollPane(menuList), BorderLayout.CENTER);
@@ -300,12 +292,13 @@ class CartGUI {
         JButton placeOrderButton = new JButton("Place Order");
         placeOrderButton.addActionListener(e -> {
             if (!cart.isEmpty()) {
-                order.setItems(cart);
-                JOptionPane.showMessageDialog(frame, "Order placed successfully!");
-                cart.clear();
-                frame.dispose();
+                order.setItems(cart); // Update the shared order
+                JOptionPane.showMessageDialog(frame, "Proceeding to checkout...", "Place Order", JOptionPane.INFORMATION_MESSAGE);
+                frame.dispose(); // Close the cart window
+                new CheckoutWindow(); // Open the CheckoutWindow
+                cart.clear(); // Clear the cart
             } else {
-                JOptionPane.showMessageDialog(frame, "Your cart is empty!");
+                JOptionPane.showMessageDialog(frame, "Your cart is empty!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         frame.add(placeOrderButton, BorderLayout.SOUTH);
@@ -313,3 +306,40 @@ class CartGUI {
         frame.setVisible(true);
     }
 }
+
+// FeedbackWindow Class
+// FeedbackWindow Class
+class FeedbackWindow extends JFrame {
+    public FeedbackWindow() {
+        setTitle("Feedback");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        JLabel label = new JLabel("Please provide your feedback", SwingConstants.CENTER);
+        label.setFont(new Font("Arial", Font.BOLD, 16));
+        add(label, BorderLayout.NORTH);
+
+        JTextArea feedbackArea = new JTextArea();
+        JScrollPane scrollPane = new JScrollPane(feedbackArea);
+        add(scrollPane, BorderLayout.CENTER);
+
+        JButton submitButton = new JButton("Submit Feedback");
+        submitButton.addActionListener(e -> {
+            String feedback = feedbackArea.getText().trim();
+            if (!feedback.isEmpty()) {
+                FoodDeliverySystem.sharedOrder.setFeedback(feedback); // Store feedback in the shared order
+                JOptionPane.showMessageDialog(this, "Thank you for your feedback!", "Feedback Submitted", JOptionPane.INFORMATION_MESSAGE);
+                this.dispose(); // Close feedback window
+            } else {
+                JOptionPane.showMessageDialog(this, "Feedback cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        add(submitButton, BorderLayout.SOUTH);
+
+        setVisible(true);
+    }
+}
+
+
