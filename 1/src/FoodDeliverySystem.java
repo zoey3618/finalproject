@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 
 public class FoodDeliverySystem {
 
@@ -252,9 +253,25 @@ class DeliveryWindow {
 
 // Menu GUI
 class MenuGUI {
+    private final HashMap<String, String> dishImageMap = new HashMap<>();
+
+
     public MenuGUI(List<String> cart) {
+        // Mapping dishes to corrected image paths
+        dishImageMap.put("Spicy and Sour Beef in Soup - $19.99", "1/src/images/2.jpeg");
+        dishImageMap.put("Steamed Fish Head with Chopped Chili - $22.99", "1/src/images/4.jpg");
+        dishImageMap.put("Minced Pork with Pickled Green Beans - $16.99", "1/src/images/5.jpeg");
+        dishImageMap.put("Twice-Cooked Pork Belly - $17.99", "1/src/images/6.jpg");
+        dishImageMap.put("Spicy and Sour Chicken Gizzards - $16.99", "1/src/images/7.jpg");
+        dishImageMap.put("Kelp and Pork Rib Soup - $14.99", "1/src/images/8.jpeg");
+        dishImageMap.put("Cold Cucumber Salad - $8.99", "1/src/images/9.jpg");
+        dishImageMap.put("Yangzhou Fried Rice - $12.99", "1/src/images/10.jpeg");
+        dishImageMap.put("Sichuan-style Boiled Beef in Chili Sauce - $19.99", "1/src/images/11.jpg");
+        dishImageMap.put("Stir-fried Chicken with Old Ginger - $18.99", "1/src/images/12.jpg");
+        dishImageMap.put("Chongqing-style Spicy Chicken - $19.99", "1/src/images/13.jpg");
+
         JFrame frame = new JFrame("Browse Menu");
-        frame.setSize(600, 400);
+        frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
@@ -262,36 +279,43 @@ class MenuGUI {
         label.setFont(new Font("Arial", Font.BOLD, 20));
         frame.add(label, BorderLayout.NORTH);
 
-        String[] menuItems = {
-            "Stir-fried Spicy Beef - $18.99",
-            "Spicy and Sour Beef in Soup - $19.99",
-            "Mao Xue Wang (Spicy Offal and Blood Stew) - $24.99",
-            "Steamed Fish Head with Chopped Chili - $22.99",
-            "Minced Pork with Pickled Green Beans - $16.99",
-            "Twice-Cooked Pork Belly - $17.99",
-            "Spicy and Sour Chicken Gizzards - $16.99",
-            "Kelp and Pork Rib Soup - $14.99",
-            "Cold Cucumber Salad - $8.99",
-            "Yangzhou Fried Rice - $12.99",
-            "Sichuan-style Boiled Beef in Chili Sauce - $19.99",
-            "Stir-fried Chicken with Old Ginger - $18.99",
-            "Chongqing-style Spicy Chicken - $19.99"
-        };
+        JPanel menuPanel = new JPanel();
+        menuPanel.setLayout(new GridLayout(0, 2, 10, 10)); // Two columns for names and images
 
-        JList<String> menuList = new JList<>(menuItems);
+        DefaultListModel<String> menuModel = new DefaultListModel<>();
+        JList<String> menuList = new JList<>(menuModel);
+        menuList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        menuList.setFont(new Font("Arial", Font.PLAIN, 16));
 
-        frame.add(new JScrollPane(menuList), BorderLayout.CENTER);
+        // Add items to the list and their images to the panel
+        for (String dish : dishImageMap.keySet()) {
+            menuModel.addElement(dish);
+
+            // Add corresponding dish image to the panel
+            String imagePath = dishImageMap.get(dish);
+            ImageIcon dishIcon = new ImageIcon(imagePath);
+            Image scaledImage = dishIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+
+            menuPanel.add(imageLabel);
+        }
+
+        // Scrollable list of menu items
+        JScrollPane scrollPane = new JScrollPane(menuList);
+        frame.add(scrollPane, BorderLayout.WEST);
+        frame.add(new JScrollPane(menuPanel), BorderLayout.CENTER);
 
         JButton addToCartButton = new JButton("Add to Cart");
         addToCartButton.addActionListener(e -> {
-            String selectedItem = menuList.getSelectedValue();
-            if (selectedItem != null) {
-                cart.add(selectedItem);
-                JOptionPane.showMessageDialog(frame, selectedItem + " added to cart!");
+            String selectedDish = menuList.getSelectedValue();
+            if (selectedDish != null) {
+                cart.add(selectedDish);
+                JOptionPane.showMessageDialog(frame, selectedDish + " added to cart!");
             } else {
-                JOptionPane.showMessageDialog(frame, "Please select an item to add to cart.");
+                JOptionPane.showMessageDialog(frame, "Please select a dish from the list.");
             }
         });
+
         frame.add(addToCartButton, BorderLayout.SOUTH);
 
         frame.setVisible(true);
