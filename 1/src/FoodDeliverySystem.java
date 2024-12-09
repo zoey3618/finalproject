@@ -320,3 +320,103 @@ class MenuGUI {
         frame.setVisible(true);
     }
 }
+// Cart GUI
+class CartGUI {
+    public CartGUI(List<String> cart, Order order) {
+        JFrame frame = new JFrame("View Cart");
+        frame.setSize(600, 400);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+
+        JLabel label = new JLabel("Your Cart", SwingConstants.CENTER);
+        label.setFont(new Font("Arial", Font.BOLD, 20));
+        frame.add(label, BorderLayout.NORTH);
+
+        JList<String> cartList = new JList<>(cart.toArray(new String[0]));
+        frame.add(new JScrollPane(cartList), BorderLayout.CENTER);
+
+        // Panel for Total Price and Place Order Button
+        JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
+
+        JLabel totalPriceLabel = new JLabel("Total Price: $0.00", SwingConstants.CENTER); // Label for total price
+        bottomPanel.add(totalPriceLabel);
+
+        JButton placeOrderButton = new JButton("Place Order");
+        placeOrderButton.addActionListener(e -> {
+            if (!cart.isEmpty()) {
+                order.setItems(cart); // Update the shared order
+                JOptionPane.showMessageDialog(frame, "Proceeding to checkout...", "Place Order", JOptionPane.INFORMATION_MESSAGE);
+                frame.dispose(); // Close the cart window
+                new CheckoutWindow(); // Open the CheckoutWindow
+                cart.clear(); // Clear the cart
+            } else {
+                JOptionPane.showMessageDialog(frame, "Your cart is empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        bottomPanel.add(placeOrderButton);
+
+        frame.add(bottomPanel, BorderLayout.SOUTH);
+
+        // Calculate and display the total price
+        updateTotalPrice(cart, totalPriceLabel);
+
+        frame.setVisible(true);
+    }
+
+    // Helper method to calculate the total price of the cart
+    private void updateTotalPrice(List<String> cart, JLabel totalPriceLabel) {
+        double totalPrice = 0.0;
+
+        for (String item : cart) {
+            // Extract the price from the cart item string (e.g., "Stir-fried Spicy Beef - $18.99")
+            int dollarIndex = item.lastIndexOf('$');
+            if (dollarIndex != -1) {
+                try {
+                    totalPrice += Double.parseDouble(item.substring(dollarIndex + 1));
+                } catch (NumberFormatException ex) {
+                    // Ignore parsing errors for invalid entries
+                }
+            }
+        }
+
+        totalPriceLabel.setText(String.format("Total Price: $%.2f", totalPrice));
+    }
+}
+
+
+// FeedbackWindow Class
+class FeedbackWindow extends JFrame {
+    public FeedbackWindow() {
+        setTitle("Feedback");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        JLabel label = new JLabel("Please provide your feedback", SwingConstants.CENTER);
+        label.setFont(new Font("Arial", Font.BOLD, 16));
+        add(label, BorderLayout.NORTH);
+
+        JTextArea feedbackArea = new JTextArea();
+        JScrollPane scrollPane = new JScrollPane(feedbackArea);
+        add(scrollPane, BorderLayout.CENTER);
+
+        JButton submitButton = new JButton("Submit Feedback");
+        submitButton.addActionListener(e -> {
+            String feedback = feedbackArea.getText().trim();
+            if (!feedback.isEmpty()) {
+                FoodDeliverySystem.sharedOrder.setFeedback(feedback); // Store feedback in the shared order
+                JOptionPane.showMessageDialog(this, "Thank you for your feedback!", "Feedback Submitted", JOptionPane.INFORMATION_MESSAGE);
+                this.dispose(); // Close feedback window
+            } else {
+                JOptionPane.showMessageDialog(this, "Feedback cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        add(submitButton, BorderLayout.SOUTH);
+
+        setVisible(true);
+    }
+}
+
+
