@@ -187,7 +187,6 @@ class RestaurantWindow {
 
 
 // Delivery Window
-// Updated DeliveryWindow
 class DeliveryWindow {
     public DeliveryWindow() {
         JFrame frame = new JFrame("Delivery Person Portal");
@@ -300,7 +299,6 @@ class MenuGUI {
 }
 
 // Cart GUI
-// Updated CartGUI with Total Price Calculation
 class CartGUI {
     public CartGUI(List<String> cart, Order order) {
         JFrame frame = new JFrame("View Cart");
