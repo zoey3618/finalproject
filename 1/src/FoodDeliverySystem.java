@@ -18,6 +18,7 @@ class Order {
     private List<String> items = new ArrayList<>();
     private String status = "No Order Placed";
     private String feedback = "No feedback yet"; // New field for feedback
+    private String message = "No messages yet";
 
     public void setItems(List<String> items) {
         this.items = new ArrayList<>(items);
@@ -42,6 +43,13 @@ class Order {
 
     public void setFeedback(String feedback) { // Setter for feedback
         this.feedback = feedback;
+    }
+    public String getMessage() { // Getter for message
+        return message;
+    }
+
+    public void setMessage(String message) { // Setter for message
+        this.message = message;
     }
 }
 
@@ -100,15 +108,21 @@ class CustomerWindow {
         JButton browseMenuButton = new JButton("Browse Menu");
         JButton viewCartButton = new JButton("View Cart");
         JButton viewOrderStatusButton = new JButton("View Order's Status");
+        JButton viewMessageButton = new JButton("View Message");
 
         browseMenuButton.addActionListener(e -> new MenuGUI(cart));
         viewCartButton.addActionListener(e -> new CartGUI(cart, FoodDeliverySystem.sharedOrder));
         viewOrderStatusButton.addActionListener(e -> JOptionPane.showMessageDialog(frame,
                 "Order Status: " + FoodDeliverySystem.sharedOrder.getStatus()));
 
+        viewMessageButton.addActionListener(e -> {
+            String message = FoodDeliverySystem.sharedOrder.getMessage();
+            JOptionPane.showMessageDialog(frame, "Message from Delivery Person: " + message, "Message", JOptionPane.INFORMATION_MESSAGE);
+        });       
         frame.add(browseMenuButton);
         frame.add(viewCartButton);
         frame.add(viewOrderStatusButton);
+        frame.add(viewMessageButton);
 
         frame.setVisible(true);
     }
@@ -189,6 +203,7 @@ class DeliveryWindow {
         JButton pickedUpButton = new JButton("Mark as Picked Up");
         JButton inTransitButton = new JButton("Mark as In Transit");
         JButton deliveredButton = new JButton("Mark as Delivered");
+        JButton sendMessageButton = new JButton("Send Message");
 
         // Disable status update buttons initially
         pickedUpButton.setEnabled(false);
@@ -216,11 +231,21 @@ class DeliveryWindow {
             JOptionPane.showMessageDialog(frame, "Order marked as Delivered.");
             new FeedbackWindow(); // Open feedback window
         });
+        sendMessageButton.addActionListener(e -> {
+            String message = JOptionPane.showInputDialog(frame, "Enter your message to the customer:");
+            if (message != null && !message.trim().isEmpty()) {
+                FoodDeliverySystem.sharedOrder.setMessage(message);
+                JOptionPane.showMessageDialog(frame, "Message sent to customer!");
+            } else {
+                JOptionPane.showMessageDialog(frame, "Message cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         frame.add(waitingButton);
         frame.add(pickedUpButton);
         frame.add(inTransitButton);
         frame.add(deliveredButton);
+        frame.add(sendMessageButton);
 
         frame.setVisible(true);
     }
@@ -275,6 +300,7 @@ class MenuGUI {
 }
 
 // Cart GUI
+// Updated CartGUI with Total Price Calculation
 class CartGUI {
     public CartGUI(List<String> cart, Order order) {
         JFrame frame = new JFrame("View Cart");
@@ -289,6 +315,12 @@ class CartGUI {
         JList<String> cartList = new JList<>(cart.toArray(new String[0]));
         frame.add(new JScrollPane(cartList), BorderLayout.CENTER);
 
+        // Panel for Total Price and Place Order Button
+        JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
+
+        JLabel totalPriceLabel = new JLabel("Total Price: $0.00", SwingConstants.CENTER); // Label for total price
+        bottomPanel.add(totalPriceLabel);
+
         JButton placeOrderButton = new JButton("Place Order");
         placeOrderButton.addActionListener(e -> {
             if (!cart.isEmpty()) {
@@ -301,11 +333,37 @@ class CartGUI {
                 JOptionPane.showMessageDialog(frame, "Your cart is empty!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-        frame.add(placeOrderButton, BorderLayout.SOUTH);
+
+        bottomPanel.add(placeOrderButton);
+
+        frame.add(bottomPanel, BorderLayout.SOUTH);
+
+        // Calculate and display the total price
+        updateTotalPrice(cart, totalPriceLabel);
 
         frame.setVisible(true);
     }
+
+    // Helper method to calculate the total price of the cart
+    private void updateTotalPrice(List<String> cart, JLabel totalPriceLabel) {
+        double totalPrice = 0.0;
+
+        for (String item : cart) {
+            // Extract the price from the cart item string (e.g., "Stir-fried Spicy Beef - $18.99")
+            int dollarIndex = item.lastIndexOf('$');
+            if (dollarIndex != -1) {
+                try {
+                    totalPrice += Double.parseDouble(item.substring(dollarIndex + 1));
+                } catch (NumberFormatException ex) {
+                    // Ignore parsing errors for invalid entries
+                }
+            }
+        }
+
+        totalPriceLabel.setText(String.format("Total Price: $%.2f", totalPrice));
+    }
 }
+
 
 // FeedbackWindow Class
 // FeedbackWindow Class
