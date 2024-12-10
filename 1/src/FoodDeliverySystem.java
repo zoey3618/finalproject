@@ -38,6 +38,10 @@ class Order {
         this.status = status;
     }
 
+    public void clearItems() {
+        this.items.clear(); // Clear the items
+    }
+
     public String getFeedback() { // Getter for feedback
         return feedback;
     }
@@ -137,7 +141,6 @@ class CustomerWindow {
 
 
 
-// Restaurant Window
 // Updated RestaurantWindow
 class RestaurantWindow {
     public RestaurantWindow() {
@@ -155,6 +158,7 @@ class RestaurantWindow {
         JButton viewFeedbackButton = new JButton("viewFeedback");
 
         viewIncomingOrdersButton.addActionListener(e -> {
+            // Always fetch the latest state
             List<String> items = FoodDeliverySystem.sharedOrder.getItems();
             if (items.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "No orders received yet.");
@@ -178,6 +182,7 @@ class RestaurantWindow {
             JOptionPane.showMessageDialog(frame, "Customer Feedback: " + feedback);
         });
 
+
         frame.add(viewIncomingOrdersButton);
         frame.add(updateOrderStatusButton);
         frame.add(viewFeedbackButton);
@@ -185,6 +190,8 @@ class RestaurantWindow {
         frame.setVisible(true);
     }
 }
+
+
 
 // Delivery Window
 class DeliveryWindow {
@@ -219,6 +226,7 @@ class DeliveryWindow {
 
         pickedUpButton.addActionListener(e -> {
             FoodDeliverySystem.sharedOrder.setStatus("Picked Up");
+            FoodDeliverySystem.sharedOrder.clearItems();
             JOptionPane.showMessageDialog(frame, "Order marked as Picked Up.");
         });
         inTransitButton.addActionListener(e -> {
